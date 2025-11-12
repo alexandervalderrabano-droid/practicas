@@ -16,6 +16,8 @@ int numProductos = 0;
 int agregarProducto(char *nombre, int cantidad, double precio);
 void mostrarProductos();
 double calcularValorTotalInventario();
+void buscarProducto();
+void actualizarStock();
 void liberarInventario();
 void cargarProductosIniciales();
 
@@ -36,7 +38,9 @@ int main() {
         printf("1. Agregar producto\n");
         printf("2. Mostrar productos\n");
         printf("3. Calcular valor total del inventario\n");
-        printf("4. Salir\n");
+        printf("4. Buscar producto por nombre\n");
+        printf("5. Actualizar stock de producto\n"); 
+        printf("6. Salir\n");
         printf("Seleccione una opcion: ");
         scanf("%d", &opcion);
         getchar(); // limpiar buffer
@@ -61,11 +65,20 @@ int main() {
             case 3:
                 printf("Valor total del inventario: $%.2f\n", calcularValorTotalInventario());
                 break;
-
+                
             case 4:
+                buscarProducto();
+                break;
+                
+            case 5:
+                actualizarStock(); 
+                break;
+
+            case 6:
                 liberarInventario();
                 printf("Saliendo del sistema...\n");
                 break;
+                
 
             default:
                 printf("Opción inválida. Intente de nuevo.\n");
@@ -132,6 +145,86 @@ double calcularValorTotalInventario() {
     return total;
 }
 
+// ----------------------------------------------------------
+// 4. Buscar producto por nombre
+// ----------------------------------------------------------
+void buscarProducto() {
+    if (numProductos == 0) {
+        printf("\nNo hay productos en el inventario.\n");
+        return;
+    }
+
+    char busqueda[100];
+    printf("\nIngrese el nombre o parte del nombre a buscar: ");
+    fgets(busqueda, sizeof(busqueda), stdin);
+    busqueda[strcspn(busqueda, "\n")] = '\0';
+
+    if (strlen(busqueda) == 0) {
+        printf("Búsqueda vacía.\n");
+        return;
+    }
+
+    int encontrados = 0;
+    int i;
+    for (i = 0; i < numProductos; i++) {
+        if (strstr(*(nombresProductos + i), busqueda)) {
+            double valor = (*(cantidades + i)) * (*(precios + i));
+            printf("Pos %d: %s - Cant: %d - Precio: $%.2f - Valor: $%.2f\n",
+                   i, *(nombresProductos + i),
+                   *(cantidades + i),
+                   *(precios + i),
+                   valor);
+            encontrados++;
+        }
+    }
+
+    if (encontrados == 0)
+        printf("No se encontraron productos con ese nombre.\n");
+}
+
+// ----------------------------------------------------------
+// 5. Actualizar stock (Modificación 2)
+// ----------------------------------------------------------
+void actualizarStock() {
+    if (numProductos == 0) {
+        printf("\nNo hay productos en el inventario.\n");
+        return;
+    }
+
+    int posicion = -1;
+    printf("\nIngrese la posición del producto a actualizar (0 - %d): ", numProductos - 1);
+    if (scanf("%d", &posicion) != 1) {
+        while (getchar() != '\n');
+        printf("Entrada inválida.\n");
+        return;
+    }
+
+    // Verifica posición válida
+    if (posicion < 0 || posicion >= numProductos) {
+        printf("Error: Posicion inválida.\n");
+        return;
+    }
+
+    printf("Producto actual: %s - Stock: %d\n", *(nombresProductos + posicion), *(cantidades + posicion));
+
+    int nuevaCantidad;
+    printf("Ingrese la nueva cantidad: ");
+    if (scanf("%d", &nuevaCantidad) != 1) {
+        while (getchar() != '\n');
+        printf("Entrada inválida.\n");
+        return;
+    }
+
+    if (nuevaCantidad < 0) {
+        printf("Error: La cantidad no puede ser negativa.\n");
+        return;
+    }
+
+    *(cantidades + posicion) = nuevaCantidad;
+    printf("Stock actualizado correctamente.\n");
+}
+
+
 // Liberar memoria
 void liberarInventario() {
 	int i;
@@ -157,5 +250,7 @@ void cargarProductosIniciales() {
     agregarProducto("Arroz", 50, 2.50);
     agregarProducto("Frijol", 40, 3.00);
     agregarProducto("Aceite", 30, 4.50);
+    agregarProducto("Coca-Cola", 10, 15.5);
+    agregarProducto("Galletas", 5, 12.0);
 }
 
